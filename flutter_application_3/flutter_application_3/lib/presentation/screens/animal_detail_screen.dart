@@ -10,9 +10,6 @@ class AnimalDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     String name = animal.name;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(name),
-      ),
       body: _DetailView(animal: animal),
     );
   }
@@ -222,6 +219,16 @@ class _DetailImg extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         height: 300,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return const SizedBox(
+            width: double.infinity,
+            height: 300,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        },
         errorBuilder: (context, error, stackTrace) {
           return Container(
             width: double.infinity,
@@ -237,6 +244,7 @@ class _DetailImg extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _SectionTitle extends StatelessWidget {

@@ -3,18 +3,54 @@ import 'package:flutter_application_3/domain/animal.dart';
 import 'package:flutter_application_3/repository/animal_repository.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.user});
-
-  final String user;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+    void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) { 
+          Future.delayed(const Duration(seconds: 5), () {
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          });
+          return AlertDialog(
+            title: Text('Actualización de animales'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Actualizando la lista de animales...'),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome, $user!'),
-      ),
       body: _ListView(animals: AnimalRepository().getAnimals()),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Handle FAB action
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
@@ -51,7 +87,27 @@ class _ListItem extends StatelessWidget {
         title: Text(animal.name, style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
         subtitle: Text(animal.species, style: TextStyle(fontStyle: FontStyle.italic)),
         trailing: Icon(Icons.arrow_forward_ios),
-        leading: ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network(animal.imageUrls[0], fit: BoxFit.cover, width: 50, height: 70)),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: 
+            Image.network(animal.imageUrls[0], 
+              fit: BoxFit.cover, 
+              width: 50, 
+              height: 70,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                }
+                return const SizedBox(
+                  width: 50,
+                  height: 70,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  )
+                );
+              }
+            )
+        ),
       ),
     );
   }
