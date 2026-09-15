@@ -1,33 +1,32 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/presentation/theme_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum Notification { always, never, onlyImportant }
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
-
-  bool darkMode = false;
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Notification notification = Notification.always;
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = ref.watch(themeProvider);
 
     return ListView(
       children: [
         SwitchListTile(
           title: const Text('Dark Mode'),
           subtitle: const Text('Enable dark mode for the app'),
-          value: darkMode,
+          value: appTheme.darkMode,
           onChanged: (bool value) {
-            setState(() {
-              darkMode = value;
-            });
+            ref.read(themeProvider.notifier).toggleDarkMode();
           },
         ),
 

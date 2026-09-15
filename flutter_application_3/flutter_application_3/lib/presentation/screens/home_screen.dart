@@ -1,53 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/domain/animal.dart';
+import 'package:flutter_application_3/presentation/animal_form_dialog.dart';
+import 'package:flutter_application_3/presentation/animal_provider.dart';
 import 'package:flutter_application_3/repository/animal_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeScreen extends StatefulWidget {
+bool _isInitialLoadDone = false;
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
     void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) { 
-          Future.delayed(const Duration(seconds: 5), () {
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          });
-          return AlertDialog(
-            title: Text('Actualización de animales'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Actualizando la lista de animales...'),
-              ],
-            ),
+      if (!_isInitialLoadDone) {
+        _isInitialLoadDone = true;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) {
+              Future.delayed(const Duration(seconds: 5), () {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              });
+              return const AlertDialog(
+                title: Text('Actualización de animales'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Actualizando la lista de animales...'),
+                  ],
+                ),
+              );
+            },
           );
-        },
-      );
-    });
-  }
+        });
+      }
+    }
 
-
+  @override
   Widget build(BuildContext context) {
+
+    final animals = ref.watch(animalsProvider);
+
     return Scaffold(
-      body: _ListView(animals: AnimalRepository().getAnimals()),
+      body: _ListView(animals: animals),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Handle FAB action
+          showDialog(
+            context: context,
+            builder: (context) => const AnimalFormDialog(),
+          );
         },
         child: const Icon(Icons.add),
       ),
